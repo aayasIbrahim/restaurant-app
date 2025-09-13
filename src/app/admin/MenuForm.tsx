@@ -20,13 +20,19 @@ export default function MenuForm({
   const addDish = () =>
     setMenu([
       ...menu,
-      { id: Date.now(), name: "", description: "", price: "", image: "" },
+      { id: Date.now(), name: "", description: "", price: 0, image: "" },
     ]);
 
-  const updateDish = (index: number, field: keyof Dish, value: string) => {
-    const updated = [...menu];
-    updated[index][field] = value;
-    setMenu(updated);
+  const updateDish = <K extends keyof Dish>(
+    index: number,
+    field: K,
+    value: Dish[K]
+  ) => {
+    setMenu((prev) =>
+      prev.map((dish, i) =>
+        i === index ? { ...dish, [field]: value } : dish
+      )
+    );
   };
 
   const deleteDish = (index: number) =>
@@ -50,13 +56,17 @@ export default function MenuForm({
                 value={dish.name}
                 onChange={(e) => updateDish(index, "name", e.target.value)}
               />
+
               <input
                 className="p-3 border rounded-lg"
                 type="number"
                 placeholder="Dish Price"
-                value={dish.price}
-                onChange={(e) => updateDish(index, "price", e.target.value)}
+                value={dish.price.toString()} // number → string
+                onChange={(e) =>
+                  updateDish(index, "price", Number(e.target.value))
+                }
               />
+
               <textarea
                 className="p-3 border rounded-lg md:col-span-2 resize-none"
                 rows={2}
@@ -74,7 +84,6 @@ export default function MenuForm({
                 </label>
 
                 <div className="relative border-2 border-dashed rounded-lg p-4 flex items-center justify-center cursor-pointer hover:border-blue-400 transition">
-                  {/* Hidden File Input */}
                   <input
                     type="file"
                     id={`dishImage-${dish.id}`}
@@ -98,11 +107,12 @@ export default function MenuForm({
                           fill
                           className="object-cover"
                         />
-
-                        {/* Spinner Overlay */}
                         {loadingDishIndex === index && (
                           <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-                            <Loader2 className="animate-spin text-blue-600" size={24} />
+                            <Loader2
+                              className="animate-spin text-blue-600"
+                              size={24}
+                            />
                           </div>
                         )}
                       </div>
