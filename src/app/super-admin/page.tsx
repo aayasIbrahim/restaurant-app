@@ -2,28 +2,39 @@
 
 import { useEffect, useState } from "react";
 
+// --- Type Definition ---
+interface User {
+  _id: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string;
+  email: string;
+  role: "super-admin" | "admin" | "user";
+}
+
 export default function SuperAdminPage() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   // সব user আনো
   useEffect(() => {
     fetch("/api/users")
-      .then(res => res.json())
-      .then(data => setUsers(data));
+      .then((res) => res.json())
+      .then((data: User[]) => setUsers(data));
   }, []);
 
-  const changeRole = async (id: string, role: string) => {
+  const changeRole = async (id: string, role: User["role"]) => {
     await fetch(`/api/users/${id}/role`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ role }),
     });
-    setUsers(users.map(u => (u._id === id ? { ...u, role } : u)));
+
+    setUsers(users.map((u) => (u._id === id ? { ...u, role } : u)));
   };
 
   const deleteUser = async (id: string) => {
     await fetch(`/api/users/${id}`, { method: "DELETE" });
-    setUsers(users.filter(u => u._id !== id));
+    setUsers(users.filter((u) => u._id !== id));
   };
 
   return (
@@ -43,14 +54,12 @@ export default function SuperAdminPage() {
         </thead>
         <tbody>
           {users.map((user) => (
-            <tr
-              key={user._id}
-              className="border-t hover:bg-gray-50 transition"
-            >
-              <td className="p-3">{user.firstName && user.lastName
-  ? `${user.firstName} ${user.lastName}`
-  : user.name}
-</td>
+            <tr key={user._id} className="border-t hover:bg-gray-50 transition">
+              <td className="p-3">
+                {user.firstName && user.lastName
+                  ? `${user.firstName} ${user.lastName}`
+                  : user.name}
+              </td>
               <td className="p-3">{user.email}</td>
               <td
                 className={`p-3 font-semibold ${

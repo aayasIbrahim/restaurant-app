@@ -3,26 +3,50 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 
+// --- Type Definitions ---
+interface NameForm {
+  firstName: string;
+  lastName: string;
+}
+
+interface EmailForm {
+  email: string;
+}
+
+interface MobileForm {
+  mobile: string;
+}
+
+interface PasswordForm {
+  oldPassword: string;
+  newPassword: string;
+}
+
+type UpdateBody = NameForm | EmailForm | MobileForm | PasswordForm;
+
 export default function ProfilePage() {
   const { data: session, update } = useSession();
 
-  const [nameForm, setNameForm] = useState({ firstName: "", lastName: "" });
-  const [emailForm, setEmailForm] = useState({ email: "" });
-  const [mobileForm, setMobileForm] = useState({ mobile: "" });
-  const [passwordForm, setPasswordForm] = useState({ oldPassword: "", newPassword: "" });
+  const [nameForm, setNameForm] = useState<NameForm>({ firstName: "", lastName: "" });
+  const [emailForm, setEmailForm] = useState<EmailForm>({ email: "" });
+  const [mobileForm, setMobileForm] = useState<MobileForm>({ mobile: "" });
+  const [passwordForm, setPasswordForm] = useState<PasswordForm>({ oldPassword: "", newPassword: "" });
 
-  const [loading, setLoading] = useState("");
-  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState<string>("");
+  const [message, setMessage] = useState<string>("");
 
   useEffect(() => {
     if (session?.user) {
-      setNameForm({ firstName: session.user.firstName || "", lastName: session.user.lastName || "" });
+      setNameForm({
+        firstName: (session.user ).firstName || "",
+        lastName: (session.user ).lastName || "",
+      });
       setEmailForm({ email: session.user.email || "" });
-      setMobileForm({ mobile: session.user.mobile || "" });
+      setMobileForm({ mobile: (session.user ).mobile || "" });
     }
-  }, []);
+  }, [session]);
 
-  const updateProfile = async (body: any, section: string) => {
+  const updateProfile = async (body: UpdateBody, section: string) => {
     setLoading(section);
     setMessage("");
 
@@ -33,18 +57,20 @@ export default function ProfilePage() {
         body: JSON.stringify(body),
       });
 
-      const data = await res.json();
+      const data: { message?: string } = await res.json();
       if (!res.ok) throw new Error(data.message || "Something went wrong");
 
       setMessage(`${section} updated successfully ✅`);
-      if (section === "Name") setNameForm(body);
-      if (section === "Email") setEmailForm(body);
-      if (section === "Mobile") setMobileForm(body);
+
+      if (section === "Name") setNameForm(body as NameForm);
+      if (section === "Email") setEmailForm(body as EmailForm);
+      if (section === "Mobile") setMobileForm(body as MobileForm);
       if (section === "Password") setPasswordForm({ oldPassword: "", newPassword: "" });
 
       update();
-    } catch (err: any) {
-      setMessage(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) setMessage(err.message);
+      else setMessage("Something went wrong");
     } finally {
       setLoading("");
     }
@@ -55,7 +81,11 @@ export default function ProfilePage() {
       <h1 className="text-3xl font-bold text-gray-800 text-center mb-8">My Profile</h1>
 
       {message && (
-        <div className={`px-4 py-3 rounded-lg text-center font-medium ${message.includes("✅") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+        <div
+          className={`px-4 py-3 rounded-lg text-center font-medium ${
+            message.includes("✅") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+          }`}
+        >
           {message}
         </div>
       )}

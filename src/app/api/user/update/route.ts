@@ -5,7 +5,17 @@ import connectDB from "../../../../lib/db";
 import User from "../../../../models/user";
 import { authOptions } from "../../../../lib/authOptions";
 
-export async function PUT(req: Request) { 
+// --- Define Request Body Type ---
+interface UpdateProfileBody {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  mobile?: string;
+  oldPassword?: string;
+  newPassword?: string;
+}
+
+export async function PUT(req: Request) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -13,7 +23,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await req.json();
+    const body: UpdateProfileBody = await req.json();
     const { firstName, lastName, email, mobile, oldPassword, newPassword } = body;
 
     await connectDB();
@@ -23,7 +33,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
-    // Update normal profile fields (always send required fields)
+    // Update normal profile fields
     if (firstName !== undefined) user.firstName = firstName;
     if (lastName !== undefined) user.lastName = lastName;
     if (email !== undefined) user.email = email;
@@ -53,8 +63,9 @@ export async function PUT(req: Request) {
     await user.save();
 
     return NextResponse.json({ message: "Profile updated successfully ✅" });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Profile update error:", error);
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Something went wrong";
+    return NextResponse.json({ message }, { status: 500 });
   }
 }

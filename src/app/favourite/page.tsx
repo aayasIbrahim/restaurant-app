@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
-import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
+import {  AiFillHeart } from "react-icons/ai";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../store/store";
 import { toggleFavourite } from "../redux/favourites/favouriteSlice";
