@@ -5,7 +5,7 @@ export interface Dish {
   id: number;
   name: string;
   description: string;
-  price: string; // চাইলে number করো
+  price: string; // 
   image: string;
 }
 

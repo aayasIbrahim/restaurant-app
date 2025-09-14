@@ -33,7 +33,7 @@ const NavbarBottom = () => {
 
   return (
     <div className="bg-white shadow-sm">
-      <div className="flex justify-center gap-10 py-4 text-gray-700 text-lg font-medium">
+      <div className="flex overflow-x-auto whitespace-nowrap gap-6 py-4 text-gray-700 text-lg font-medium md:justify-center md:overflow-x-visible md:whitespace-normal md:gap-10 md:scroll-smooth">
         {menuItems.map((item, idx) => (
           <Link key={idx} href={item.href} className="relative flex flex-col items-center group">
             <div className="flex items-center gap-2 mb-3 text-lg cursor-pointer transition-transform duration-300 hover:-translate-y-1">
