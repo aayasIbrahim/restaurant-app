@@ -6,7 +6,7 @@ import NavbarBottom from "./NavbarBottom";
 
 const Navbar = () => {
   return (
-    <header className="w-full bg-white shadow-md">
+    <header className="sticky top-0 bg-white px-3 z-50 w-full  shadow-md">
        <NavbarTop />
        <NavbarBottom/>
     </header>

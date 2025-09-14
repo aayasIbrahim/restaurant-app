@@ -12,7 +12,7 @@ const NavbarBottom = () => {
 
   // Default menu items
   const menuItems = [
-    { icon: <FaMotorcycle />, label: "Delivery", href: "/delivery" },
+    { icon: <FaMotorcycle />, label: "Delivery", href: "/" },
     { icon: <FaStore />, label: "Pick-up", href: "/pickup" },
     { icon: <MdOutlineLocalGroceryStore />, label: "Pandamart", href: "/pandamart" },
     { icon: <FaShoppingBasket />, label: "Shop", href: "/shop" },

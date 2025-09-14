@@ -63,7 +63,7 @@ const HomePage: React.FC = () => {
   }, [restaurants, selectedCuisines, selectedPrices, offers, quickFilter, sortBy]);
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-900 text-white">
+    <div className=" container mx-auto flex flex-col lg:flex-row min-h-screen bg-gray-900 text-white">
       <div className="hidden lg:block w-72">
         <AdvanceFilterSidebar />
       </div>
