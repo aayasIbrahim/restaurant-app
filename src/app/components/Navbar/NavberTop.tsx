@@ -8,7 +8,7 @@ import NavIcons from "../Navbar/NavIcons";
 const NavbarTop: React.FC = () => {
   return (
     <div className="bg-white shadow-md w-full  top-0 left-0 z-50">
-      <div className="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between px-4 py-1 max-w-7xl mx-auto">
         {/* ===== Mobile Layout ===== */}
         <div className="flex w-full items-center justify-between md:hidden">
           {/* Left: Account */}
