@@ -119,7 +119,7 @@ const HomePage: React.FC = () => {
             onClick={() => setSidebarOpen(false)}
           />
           <div className="z-100000 fixed top-[41px] left-0 w-72 h-full overflow-y-auto">
-            <AdvanceFilterSidebar  setOpen={() => setSidebarOpen(false)} />
+            <AdvanceFilterSidebar  onclose={() => setSidebarOpen(false)} />
           </div>
         </>
       )}

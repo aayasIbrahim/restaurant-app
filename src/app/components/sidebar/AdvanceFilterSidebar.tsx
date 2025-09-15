@@ -14,25 +14,35 @@ import {
 
 const cuisines = ["Bangladeshi", "Indian", "Chinese", "Italian", "Thai"];
 const prices = ["Low", "Medium", "High"];
+interface AdvanceFilterSidebarProps {
+  onclose: () => void;
+}
 
-const AdvanceFilterSidebar: React.FC = ({setOpen}) => {
+const AdvanceFilterSidebar: React.FC<AdvanceFilterSidebarProps> = ({ onclose }) => {
   const dispatch = useDispatch();
-  const { sortBy, quickFilter, offers, selectedCuisines, selectedPrices } = useSelector(
-    (state: RootState) => state.filters
-  );
+  const { sortBy, quickFilter, offers, selectedCuisines, selectedPrices } =
+    useSelector((state: RootState) => state.filters);
   const [searchCuisine, setSearchCuisine] = useState("");
 
   return (
-    <aside className="sticky top-[122px]  p-6 h-[calc(100vh_-_122px)] sm:w-80  lg:w-72 bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-lg rounded-lg flex flex-col gap-6">
+    <aside
+      className=" sticky 
+  top-[125px] sm:top-[170px] 
+  p-5 
+  h-[calc(100vh_-_125px)] sm:h-[calc(100vh_-_170px)] 
+  bg-gray-200 dark:bg-gray-900 
+  text-gray-900 dark:text-gray-100 
+  shadow-lg rounded-lg 
+  flex flex-col gap-6"
+    >
       {/* Header */}
       <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-4 sticky top-0 bg-gray-200 dark:bg-gray-900 z-10">
         <h2 className="text-xl font-semibold">Filters</h2>
         <button
-        onClick={() => {
-  dispatch(clearAll());
-  setOpen(false);
-}}
-
+          onClick={() => {
+            dispatch(clearAll());
+            onclose();
+          }}
           className="text-sm text-pink-500 hover:text-pink-600 flex items-center gap-1 transition-colors"
         >
           <X size={18} /> Clear All
@@ -43,7 +53,9 @@ const AdvanceFilterSidebar: React.FC = ({setOpen}) => {
       <div className="flex flex-col gap-6 overflow-y-auto max-h-[calc(100vh-6rem)] pr-2 scrollbar-thin scrollbar-thumb-pink-400 scrollbar-track-gray-200 dark:scrollbar-track-gray-800">
         {/* Sort By */}
         <section>
-          <h3 className="font-medium mb-2 text-gray-700 dark:text-gray-300">Sort by</h3>
+          <h3 className="font-medium mb-2 text-gray-700 dark:text-gray-300">
+            Sort by
+          </h3>
           <div className="flex flex-col gap-2">
             {["relevance", "fastest", "distance", "top"].map((val) => (
               <label
@@ -64,29 +76,34 @@ const AdvanceFilterSidebar: React.FC = ({setOpen}) => {
 
         {/* Quick Filter */}
         <section>
-          <h3 className="font-medium mb-2 text-gray-700 dark:text-gray-300">Quick Filter</h3>
+          <h3 className="font-medium mb-2 text-gray-700 dark:text-gray-300">
+            Quick Filter
+          </h3>
           <div className="flex flex-wrap gap-2">
-            {[{ key: "rating4", label: "Rating 4+" }, { key: "super", label: "Super Restaurant" }].map(
-              (f) => (
-                <button
-                  key={f.key}
-                  onClick={() => dispatch(toggleQuickFilter(f.key))}
-                  className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors ${
-                    quickFilter.includes(f.key)
-                      ? "bg-pink-500 text-white border-pink-500"
-                      : "bg-gray-100 border-gray-300 hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
-                  }`}
-                >
-                  {f.label}
-                </button>
-              )
-            )}
+            {[
+              { key: "rating4", label: "Rating 4+" },
+              { key: "super", label: "Super Restaurant" },
+            ].map((f) => (
+              <button
+                key={f.key}
+                onClick={() => dispatch(toggleQuickFilter(f.key))}
+                className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors ${
+                  quickFilter.includes(f.key)
+                    ? "bg-pink-500 text-white border-pink-500"
+                    : "bg-gray-100 border-gray-300 hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
           </div>
         </section>
 
         {/* Offers */}
         <section>
-          <h3 className="font-medium mb-2 text-gray-700 dark:text-gray-300">Offers</h3>
+          <h3 className="font-medium mb-2 text-gray-700 dark:text-gray-300">
+            Offers
+          </h3>
           <div className="flex flex-col gap-2">
             {["Free delivery", "Accepts vouchers", "Deals"].map((offer) => (
               <label
@@ -107,7 +124,9 @@ const AdvanceFilterSidebar: React.FC = ({setOpen}) => {
 
         {/* Cuisines */}
         <section>
-          <h3 className="font-medium mb-2 text-gray-700 dark:text-gray-300">Cuisines</h3>
+          <h3 className="font-medium mb-2 text-gray-700 dark:text-gray-300">
+            Cuisines
+          </h3>
           <input
             type="text"
             placeholder="Search cuisine"
@@ -117,7 +136,9 @@ const AdvanceFilterSidebar: React.FC = ({setOpen}) => {
           />
           <div className="flex flex-col gap-2">
             {cuisines
-              .filter((c) => c.toLowerCase().includes(searchCuisine.toLowerCase()))
+              .filter((c) =>
+                c.toLowerCase().includes(searchCuisine.toLowerCase())
+              )
               .map((c) => (
                 <label
                   key={c}
@@ -137,7 +158,9 @@ const AdvanceFilterSidebar: React.FC = ({setOpen}) => {
 
         {/* Price */}
         <section>
-          <h3 className="font-medium mb-2 text-gray-700 dark:text-gray-300">Price</h3>
+          <h3 className="font-medium mb-2 text-gray-700 dark:text-gray-300">
+            Price
+          </h3>
           <div className="flex flex-col gap-2">
             {prices.map((p) => (
               <label
