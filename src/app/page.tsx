@@ -10,6 +10,11 @@ import RestaurantCard from "./components/UI/RestaurantCard";
 // import { toggleFavourite } from "./redux/favourites/favouriteSlice";
 
 // ✅ Small debounce hook
+// 📝 Custom hook: useDebounce
+// কাজ: যেকোনো value change হলে সাথে সাথে return না করে,
+// নির্দিষ্ট সময় (delay) অপেক্ষা করে তারপর return করে।
+// সাধারণত search input এ ব্যবহার হয় যাতে user টাইপ করা বন্ধ করার পরেই
+// API call / filtering ট্রিগার হয়।
 function useDebounce<T>(value: T, delay = 400): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
   useEffect(() => {
@@ -63,21 +68,23 @@ const HomePage: React.FC = () => {
   const filteredRestaurants = useMemo(() => {
     let res = [...restaurants];
 
-    if (debouncedSearch.trim()) {
-      const term = debouncedSearch.toLowerCase();
-      res = res.filter(
-        (r) =>
-          (typeof r.name === "string" && r.name.toLowerCase().includes(term)) ||
-          (typeof r.cuisine === "string" &&
-            r.cuisine.toLowerCase().includes(term)) ||
-          (Array.isArray(r.menu) &&
-            r.menu.some(
-              (item) =>
-                typeof item === "string" &&
-                item.toLowerCase().includes(term)
-            ))
-      );
-    }
+ if (debouncedSearch.trim()) {
+  const term = debouncedSearch.toLowerCase();
+  res = res.filter(
+    (r) =>
+      (typeof r.name === "string" && r.name.toLowerCase().includes(term)) ||
+      (typeof r.cuisine === "string" &&
+        r.cuisine.toLowerCase().includes(term)) ||
+      (Array.isArray(r.menu) &&
+        r.menu.some(
+          (dish) =>
+            dish &&
+            typeof dish.name === "string" &&
+            dish.name.toLowerCase().includes(term)
+        ))
+  );
+}
+
 
     if (selectedCuisines.length)
       res = res.filter((r) => selectedCuisines.includes(r.cuisine));
@@ -99,7 +106,7 @@ const HomePage: React.FC = () => {
     <div className="container mx-auto flex flex-col lg:flex-row min-h-screen bg-gray-900 text-white">
       {/* Sidebar Desktop */}
       <div className="hidden lg:block w-72">
-        <AdvanceFilterSidebar />
+        <AdvanceFilterSidebar onclose={() => setSidebarOpen(false)} />
       </div>
 
       {/* Mobile Filter */}
