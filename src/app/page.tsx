@@ -37,6 +37,7 @@ interface Restaurant {
   isSuper?: boolean;
   image?: string;
   menu?: (string | number | null)[];
+
 }
 
 const HomePage: React.FC = () => {
@@ -147,6 +148,7 @@ const HomePage: React.FC = () => {
             {filteredRestaurants.map((r) => (
               <RestaurantCard
                 key={r._id}
+                price={r.price}
                 id={r._id}
                 name={r.name}
                 cuisine={r.cuisine}
