@@ -15,7 +15,7 @@ import {
 const cuisines = ["Bangladeshi", "Indian", "Chinese", "Italian", "Thai"];
 const prices = ["Low", "Medium", "High"];
 
-const AdvanceFilterSidebar: React.FC = () => {
+const AdvanceFilterSidebar: React.FC = ({setOpen}) => {
   const dispatch = useDispatch();
   const { sortBy, quickFilter, offers, selectedCuisines, selectedPrices } = useSelector(
     (state: RootState) => state.filters
@@ -23,12 +23,16 @@ const AdvanceFilterSidebar: React.FC = () => {
   const [searchCuisine, setSearchCuisine] = useState("");
 
   return (
-    <aside className="sticky top-[122px]  p-6 h-[calc(100vh_-_122px)] sm:w-80 lg:w-72 bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-lg rounded-lg flex flex-col gap-6">
+    <aside className="sticky top-[122px]  p-6 h-[calc(100vh_-_122px)] sm:w-80  lg:w-72 bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-lg rounded-lg flex flex-col gap-6">
       {/* Header */}
       <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-4 sticky top-0 bg-gray-200 dark:bg-gray-900 z-10">
         <h2 className="text-xl font-semibold">Filters</h2>
         <button
-          onClick={() => dispatch(clearAll())}
+        onClick={() => {
+  dispatch(clearAll());
+  setOpen(false);
+}}
+
           className="text-sm text-pink-500 hover:text-pink-600 flex items-center gap-1 transition-colors"
         >
           <X size={18} /> Clear All

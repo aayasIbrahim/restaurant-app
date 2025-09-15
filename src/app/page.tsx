@@ -1,17 +1,15 @@
 "use client";
 import React, { useEffect, useState, useMemo } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import { SlidersHorizontal } from "lucide-react";
-import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
-import { useDispatch, useSelector } from "react-redux";
-import { toggleFavourite } from "./redux/favourites/favouriteSlice";
+import {  useSelector } from "react-redux";
 import { RootState } from "./store/store";
 import AdvanceFilterSidebar from "./components/sidebar/AdvanceFilterSidebar";
 import LoadingGrid from "./components/UI/LoadingGrid";
 import SearchInput from "./components/UI/SearchInput";
+import RestaurantCard from "./components/UI/RestaurantCard";
+// import { toggleFavourite } from "./redux/favourites/favouriteSlice";
 
-// ✅ Small debounce hook (best practice for search UX)
+// ✅ Small debounce hook
 function useDebounce<T>(value: T, delay = 400): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
   useEffect(() => {
@@ -33,17 +31,17 @@ interface Restaurant {
   deliveryTime: number;
   isSuper?: boolean;
   image?: string;
-  menu?: string[];
+  menu?: (string | number | null)[];
 }
 
 const HomePage: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [search, setSearch] = useState(""); // raw search input
-  const debouncedSearch = useDebounce(search); // ✅ Debounced value
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search);
 
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const { selectedCuisines, selectedPrices, offers, quickFilter, sortBy } =
     useSelector((state: RootState) => state.filters);
   const favourites = useSelector((state: RootState) => state.favourites.items);
@@ -65,13 +63,11 @@ const HomePage: React.FC = () => {
   const filteredRestaurants = useMemo(() => {
     let res = [...restaurants];
 
-    // Safe Search filter (name + cuisine + menu)
     if (debouncedSearch.trim()) {
       const term = debouncedSearch.toLowerCase();
       res = res.filter(
         (r) =>
-          (typeof r.name === "string" &&
-            r.name.toLowerCase().includes(term)) ||
+          (typeof r.name === "string" && r.name.toLowerCase().includes(term)) ||
           (typeof r.cuisine === "string" &&
             r.cuisine.toLowerCase().includes(term)) ||
           (Array.isArray(r.menu) &&
@@ -82,30 +78,22 @@ const HomePage: React.FC = () => {
             ))
       );
     }
+
     if (selectedCuisines.length)
       res = res.filter((r) => selectedCuisines.includes(r.cuisine));
     if (selectedPrices.length)
       res = res.filter((r) => selectedPrices.includes(r.priceLabel));
-    if (offers.length) res = res.filter((r) => offers.includes(r.offer || ""));
+    if (offers.length) res = res.filter((r) => offers.includes(r.offer ?? ""));
     quickFilter.forEach((f) => {
       if (f === "rating4") res = res.filter((r) => r.rating >= 4);
       if (f === "super") res = res.filter((r) => r.isSuper);
     });
-    if (sortBy === "fastest")
-      res.sort((a, b) => a.deliveryTime - b.deliveryTime);
+    if (sortBy === "fastest") res.sort((a, b) => a.deliveryTime - b.deliveryTime);
     if (sortBy === "distance") res.sort((a, b) => a.distance - b.distance);
     if (sortBy === "top") res.sort((a, b) => b.rating - a.rating);
 
     return res;
-  }, [
-    restaurants,
-    debouncedSearch,
-    selectedCuisines,
-    selectedPrices,
-    offers,
-    quickFilter,
-    sortBy,
-  ]);
+  }, [restaurants, debouncedSearch, selectedCuisines, selectedPrices, offers, quickFilter, sortBy]);
 
   return (
     <div className="container mx-auto flex flex-col lg:flex-row min-h-screen bg-gray-900 text-white">
@@ -130,8 +118,8 @@ const HomePage: React.FC = () => {
             className="fixed inset-0 bg-black bg-opacity-50"
             onClick={() => setSidebarOpen(false)}
           />
-          <div className="z-100000 fixed top-0 left-0 w-72 h-full overflow-y-auto">
-            <AdvanceFilterSidebar />
+          <div className="z-100000 fixed top-[41px] left-0 w-72 h-full overflow-y-auto">
+            <AdvanceFilterSidebar  setOpen={() => setSidebarOpen(false)} />
           </div>
         </>
       )}
@@ -141,66 +129,28 @@ const HomePage: React.FC = () => {
           All Restaurants
         </h1>
 
-{/* Modern searchInput */}
-<SearchInput value={search} onChange={setSearch}/>
+        {/* Search Input */}
+        <SearchInput value={search} onChange={setSearch} />
 
-
-
-        {/* 🌀 Loader */}
+        {/* Loader */}
         {loading ? (
           <LoadingGrid count={6} />
         ) : filteredRestaurants.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredRestaurants.map((r) => {
-              const isFav = favourites.includes(r._id);
-              return (
-                <div
-                  key={r._id}
-                  className="relative bg-white/10 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 overflow-hidden hover:scale-105 transition-transform duration-200"
-                >
-                  <Link href={`/restaurants/${r._id}`}>
-                    {r.image ? (
-                      <div className="relative w-full h-48">
-                        <Image
-                          src={r.image}
-                          alt={r.name}
-                          fill
-                          className="object-cover rounded-t-2xl"
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-48 w-full flex items-center justify-center bg-gray-600 rounded-t-2xl text-white font-semibold">
-                        {r.name}
-                      </div>
-                    )}
-                    <div className="p-4">
-                      <h3 className="font-semibold text-white text-lg">
-                        {r.name}
-                      </h3>
-                      <p className="text-gray-300 text-sm line-clamp-2">
-                        {r.cuisine} • {r.priceLabel} •{" "}
-                        {r.offer || "No Offer"}
-                      </p>
-                    </div>
-                  </Link>
-                  {/* Favourite Button */}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      dispatch(toggleFavourite(r._id));
-                    }}
-                    className="absolute top-3 right-3 p-2 rounded-full bg-white/10 text-pink-500 hover:bg-white/20 transition"
-                  >
-                    {isFav ? (
-                      <AiFillHeart size={20} />
-                    ) : (
-                      <AiOutlineHeart size={20} />
-                    )}
-                  </button>
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+            {filteredRestaurants.map((r) => (
+              <RestaurantCard
+                key={r._id}
+                id={r._id}
+                name={r.name}
+                cuisine={r.cuisine}
+                priceLabel={r.priceLabel}
+                offer={r.offer}
+                image={r.image}
+                rating={r.rating}
+                deliveryTime={r.deliveryTime}
+                isFav={favourites.includes(r._id)}
+              />
+            ))}
           </div>
         ) : (
           <div className="text-center mt-12">
