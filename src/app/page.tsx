@@ -1,10 +1,10 @@
 "use client";
 import React, { useEffect, useState, useMemo } from "react";
 import { SlidersHorizontal } from "lucide-react";
-import {  useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "./store/store";
 import AdvanceFilterSidebar from "./components/sidebar/AdvanceFilterSidebar";
-import LoadingGrid from "./components/UI/LoadingGrid";
+import LoadingGrid from "./components/UI/loading/LoadingGrid";
 import SearchInput from "./components/UI/SearchInput";
 import RestaurantCard from "./components/UI/RestaurantCard";
 // import { toggleFavourite } from "./redux/favourites/favouriteSlice";
@@ -37,7 +37,6 @@ interface Restaurant {
   isSuper?: boolean;
   image?: string;
   menu?: (string | number | null)[];
-
 }
 
 const HomePage: React.FC = () => {
@@ -69,23 +68,22 @@ const HomePage: React.FC = () => {
   const filteredRestaurants = useMemo(() => {
     let res = [...restaurants];
 
- if (debouncedSearch.trim()) {
-  const term = debouncedSearch.toLowerCase();
-  res = res.filter(
-    (r) =>
-      (typeof r.name === "string" && r.name.toLowerCase().includes(term)) ||
-      (typeof r.cuisine === "string" &&
-        r.cuisine.toLowerCase().includes(term)) ||
-      (Array.isArray(r.menu) &&
-        r.menu.some(
-          (dish) =>
-            dish &&
-            typeof dish.name === "string" &&
-            dish.name.toLowerCase().includes(term)
-        ))
-  );
-}
-
+    if (debouncedSearch.trim()) {
+      const term = debouncedSearch.toLowerCase();
+      res = res.filter(
+        (r) =>
+          (typeof r.name === "string" && r.name.toLowerCase().includes(term)) ||
+          (typeof r.cuisine === "string" &&
+            r.cuisine.toLowerCase().includes(term)) ||
+          (Array.isArray(r.menu) &&
+            r.menu.some(
+              (dish) =>
+                dish &&
+                typeof dish.name === "string" &&
+                dish.name.toLowerCase().includes(term)
+            ))
+      );
+    }
 
     if (selectedCuisines.length)
       res = res.filter((r) => selectedCuisines.includes(r.cuisine));
@@ -96,12 +94,21 @@ const HomePage: React.FC = () => {
       if (f === "rating4") res = res.filter((r) => r.rating >= 4);
       if (f === "super") res = res.filter((r) => r.isSuper);
     });
-    if (sortBy === "fastest") res.sort((a, b) => a.deliveryTime - b.deliveryTime);
+    if (sortBy === "fastest")
+      res.sort((a, b) => a.deliveryTime - b.deliveryTime);
     if (sortBy === "distance") res.sort((a, b) => a.distance - b.distance);
     if (sortBy === "top") res.sort((a, b) => b.rating - a.rating);
 
     return res;
-  }, [restaurants, debouncedSearch, selectedCuisines, selectedPrices, offers, quickFilter, sortBy]);
+  }, [
+    restaurants,
+    debouncedSearch,
+    selectedCuisines,
+    selectedPrices,
+    offers,
+    quickFilter,
+    sortBy,
+  ]);
 
   return (
     <div className="container mx-auto flex flex-col lg:flex-row min-h-screen bg-gray-900 text-white">
@@ -127,7 +134,7 @@ const HomePage: React.FC = () => {
             onClick={() => setSidebarOpen(false)}
           />
           <div className="z-100000 fixed top-[41px] left-0 w-72 h-full overflow-y-auto">
-            <AdvanceFilterSidebar  onclose={() => setSidebarOpen(false)} />
+            <AdvanceFilterSidebar onclose={() => setSidebarOpen(false)} />
           </div>
         </>
       )}

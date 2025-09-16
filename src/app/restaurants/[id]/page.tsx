@@ -2,12 +2,22 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { AiOutlineHeart, AiFillHeart, AiOutlineShoppingCart } from "react-icons/ai";
+import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
+import {
+  FaStar,
+  FaClock,
+  FaUtensils,
+  FaGift,
+  FaMapMarkerAlt,
+} from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleFavourite } from "../../redux/favourites/favouriteSlice";
-import { addToCart } from "../../redux/Carts/cartSlice";
 import { RootState } from "../../store/store";
+import SkeletonCard from "@/app/components/UI/loading/SkeletonCard";
+import LoadingGrid from "@/app/components/UI/loading/LoadingGrid";
+import MenuCard from "@/app/components/UI/MenuCard";
 
+// Interfaces
 interface MenuItem {
   id: number;
   name: string;
@@ -35,17 +45,65 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+// 💡 Price badge
+const getPriceBadge = (level: string) => {
+  switch (level.toLowerCase()) {
+    case "easy":
+      return (
+        <span className="px-3 py-1 bg-green-600 text-white rounded-full text-xs font-semibold shadow-sm">
+          💰 Easy
+        </span>
+      );
+    case "medium":
+      return (
+        <span className="px-3 py-1 bg-yellow-500 text-white rounded-full text-xs font-semibold shadow-sm">
+          💰 Medium
+        </span>
+      );
+    case "high":
+      return (
+        <span className="px-3 py-1 bg-red-600 text-white rounded-full text-xs font-semibold shadow-sm">
+          💰 High
+        </span>
+      );
+    default:
+      return (
+        <span className="px-3 py-1 bg-gray-500 text-white rounded-full text-xs font-semibold shadow-sm">
+          N/A
+        </span>
+      );
+  }
+};
+
+// 💡 Offer badge
+const getOfferBadge = (offer?: string) => {
+  if (!offer) return null;
+  return (
+    <span className="px-3 py-1 bg-pink-500 text-white rounded-full text-xs font-semibold shadow-sm">
+      {offer}
+    </span>
+  );
+};
+
+// 💡 Rating badge
+const getRatingBadge = (rating: number) => (
+  <span className="flex items-center gap-1 bg-yellow-400 text-black px-2 py-0.5 rounded-md text-xs font-medium">
+    <FaStar size={12} /> {rating.toFixed(1)}
+  </span>
+);
+
 export default function RestaurantPage({ params }: Props) {
+  const { id } = React.use(params);
   const dispatch = useDispatch();
-  const favouriteIds = useSelector((state: RootState) => state.favourites.items);
+  const favouriteIds = useSelector(
+    (state: RootState) => state.favourites.items
+  );
 
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const resolvedParams = React.use(params);
-  const id = resolvedParams.id;
-
   useEffect(() => {
+    if (!id) return;
     setLoading(true);
     fetch(`/api/restaurants/${id}`, { cache: "no-store" })
       .then(async (res) => {
@@ -57,92 +115,109 @@ export default function RestaurantPage({ params }: Props) {
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <p className="text-white text-center mt-10">Loading...</p>;
-  if (!restaurant) return <p className="text-white text-center mt-10">Restaurant not found</p>;
+  if (loading)
+    return (
+      <div>
+        <SkeletonCard />
+        <LoadingGrid count={6} />
+      </div>
+    );
+
+  if (!restaurant)
+    return <p className="text-white text-center mt-10">Restaurant not found</p>;
 
   const isFav = favouriteIds.includes(restaurant._id);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8 space-y-10">
-      
-      {/* Banner */}
-      {restaurant.image ? (
-        <div className="relative h-64 w-full rounded-3xl overflow-hidden shadow-lg">
-          <Image src={restaurant.image} alt={restaurant.name} fill className="object-cover" />
-        </div>
-      ) : (
-        <div className="relative h-64 w-full flex items-center justify-center bg-pink-500/30 text-white text-4xl font-bold rounded-3xl">
-          {restaurant.name}
-        </div>
-      )}
-
-      {/* Info & Actions */}
-      <div className="w-full max-w-5xl p-6 sm:flex sm:justify-between sm:items-start gap-6 bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-lg">
-        <div className="flex-1 space-y-3">
-          <h1 className="text-3xl sm:text-4xl font-bold">{restaurant.name}</h1>
-          <p className="text-gray-300 text-lg">{restaurant.cuisine} • {restaurant.priceLabel} • {restaurant.offer || "No Offer"}</p>
-          <div className="flex items-center gap-2">
-            <span className="text-yellow-400 font-semibold">⭐ {restaurant.rating}</span>
-            <span className="text-gray-400">• {restaurant.distance} km • {restaurant.deliveryTime} mins</span>
+    <section className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-black">
+      <div className="container mx-auto text-white flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8 space-y-10">
+        {/* Banner */}
+        {restaurant.image ? (
+          <div className="relative h-64 w-full rounded-3xl overflow-hidden shadow-lg group">
+            <Image
+              src={restaurant.image}
+              alt={restaurant.name}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-110"
+            />
+            <div className="absolute inset-0 bg-black/25"></div>
           </div>
-          {restaurant.isSuper && (
-            <span className="inline-block mt-2 px-4 py-1 text-sm font-semibold text-pink-500 bg-pink-500/20 rounded-full">
-              Super Restaurant
-            </span>
-          )}
-        </div>
+        ) : (
+          <div className="relative h-64 w-full flex items-center justify-center bg-pink-500/30 text-white text-4xl font-bold rounded-3xl">
+            {restaurant.name}
+          </div>
+        )}
 
-        {/* Action Buttons */}
-        <div className="flex flex-col gap-3 sm:items-end">
-          <button
-            onClick={() => dispatch(toggleFavourite(restaurant._id))}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 transition text-pink-500 font-semibold"
-          >
-            {isFav ? <AiFillHeart size={22} /> : <AiOutlineHeart size={22} />}
-            {isFav ? "Remove Favourite" : "Add Favourite"}
-          </button>
-        </div>
-      </div>
+        {/* Info & Actions */}
+        <div className="w-full max-w-5xl p-6 sm:flex sm:justify-between sm:items-start gap-6 bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-lg">
+          {/* Info Section */}
+          <div className="flex-1 space-y-4">
+            <h1 className="text-3xl sm:text-4xl font-bold">
+              {restaurant.name}
+            </h1>
 
-      {/* Menu Section */}
-      <div className="w-full max-w-5xl space-y-6">
-        <h2 className="text-2xl font-bold mb-4">Menu</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {restaurant.menu.map((item) => (
-            <div key={item.id} className="bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden border border-white/20 shadow-lg hover:scale-105 transition-transform duration-200 flex flex-col">
-              
-              {/* Item Image */}
-              {item.image ? (
-                <div className="relative h-40 w-full">
-                  <Image src={item.image} alt={item.name} fill className="object-cover" />
-                </div>
-              ) : (
-                <div className="h-40 w-full flex items-center justify-center bg-gray-600 text-white font-semibold">
-                  {item.name}
-                </div>
+            {/* Modern UL */}
+            <ul className="flex flex-wrap gap-4">
+              <li className="flex items-center gap-3 flex-1 min-w-[200px] p-4 rounded-xl bg-white/5 hover:bg-white/10 transition">
+                <FaUtensils className="text-pink-400" />
+                <span className="font-medium">{restaurant.cuisine}</span>
+              </li>
+              <li className="flex items-center gap-3 flex-1 min-w-[200px] p-4 rounded-xl bg-white/5 hover:bg-white/10 transition">
+                <FaMapMarkerAlt className="text-green-400" />
+                <span className="font-medium">
+                  {restaurant.distance} km away
+                </span>
+              </li>
+              <li className="flex items-center gap-3 flex-1 min-w-[200px] p-4 rounded-xl bg-white/5 hover:bg-white/10 transition">
+                <FaClock className="text-blue-400" />
+                <span className="font-medium">
+                  {restaurant.deliveryTime} mins delivery
+                </span>
+              </li>
+              <li className="flex items-center gap-3 flex-1 min-w-[200px] p-4 rounded-xl bg-white/5 hover:bg-white/10 transition">
+                💵 {getPriceBadge(restaurant.priceLabel)}
+              </li>
+              {restaurant.offer && (
+                <li className="flex items-center gap-3 flex-1 min-w-[200px] p-4 rounded-xl bg-white/5 hover:bg-white/10 transition">
+                  <FaGift className="text-yellow-400" />
+                  {getOfferBadge(restaurant.offer)}
+                </li>
               )}
+              <li className="flex items-center gap-3 flex-1 min-w-[200px] p-4 rounded-xl bg-white/5 hover:bg-white/10 transition">
+                <FaStar className="text-yellow-400" />
+                {getRatingBadge(restaurant.rating)}
+              </li>
+            </ul>
 
-              {/* Item Info */}
-              <div className="p-4 flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 className="text-white font-semibold text-lg">{item.name}</h3>
-                  <p className="text-gray-300 text-sm line-clamp-2">{item.description}</p>
-                </div>
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="text-white font-bold">${item.price}</span>
-                  <button
-                    onClick={() => dispatch(addToCart({ id: item.id, name: item.name, price: item.price }))}
-                    className="px-3 py-1 bg-pink-500 hover:bg-pink-600 rounded-lg text-white font-semibold transition"
-                  >
-                    <AiOutlineShoppingCart size={18} />
-                  </button>
-                </div>
-              </div>
+            {restaurant.isSuper && (
+              <span className="inline-block mt-4 px-4 py-1 text-sm font-semibold text-pink-500 bg-pink-500/20 rounded-full">
+                🌟 Super Restaurant
+              </span>
+            )}
+          </div>
 
-            </div>
-          ))}
+          {/* Action Buttons */}
+          <div className="flex flex-col gap-3 sm:items-end mt-6 sm:mt-0">
+            <button
+              onClick={() => dispatch(toggleFavourite(restaurant._id))}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 hover:opacity-90 transition text-white font-semibold shadow-lg"
+            >
+              {isFav ? <AiFillHeart size={22} /> : <AiOutlineHeart size={22} />}
+              {isFav ? "Remove Favourite" : "Add Favourite"}
+            </button>
+          </div>
+        </div>
+
+        {/* Menu Section */}
+        <div className="w-full max-w-5xl space-y-6">
+          <h2 className="text-2xl font-bold mb-4">Menu</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {restaurant.menu.map((item) => (
+              <MenuCard key={item.id} item={item} />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
