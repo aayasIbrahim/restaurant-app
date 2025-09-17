@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useMemo } from "react";
-import { SlidersHorizontal } from "lucide-react";
+import { Section, SlidersHorizontal } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "./store/store";
 import AdvanceFilterSidebar from "./components/sidebar/AdvanceFilterSidebar";
@@ -111,7 +111,8 @@ const HomePage: React.FC = () => {
   ]);
 
   return (
-    <div className="container mx-auto flex flex-col lg:flex-row min-h-screen bg-gray-900 text-white">
+  <section className="min-h-screen bg-gray-900 text-white">
+      <div className="container mx-auto flex flex-col lg:flex-row min-h-screen bg-gray-900 text-white">
       {/* Sidebar Desktop */}
       <div className="hidden lg:block w-72">
         <AdvanceFilterSidebar onclose={() => setSidebarOpen(false)} />
@@ -178,6 +179,7 @@ const HomePage: React.FC = () => {
         )}
       </main>
     </div>
+  </section>
   );
 };
 

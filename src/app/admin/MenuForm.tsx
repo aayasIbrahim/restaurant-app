@@ -1,14 +1,13 @@
-"use client";
 import React from "react";
+import { Loader2, Trash2, Plus } from "lucide-react";
 import Image from "next/image";
-import { Loader2, Trash2 } from "lucide-react";
-import { Dish } from "./../redux/Api/restaurantTypes";
+import { Dish } from "../redux/Api/restaurantTypes";
 
-interface MenuFormProps {
+interface Props {
   menu: Dish[];
   setMenu: React.Dispatch<React.SetStateAction<Dish[]>>;
-  loadingDishIndex?: number | null;
-  handleDishImage?: (index: number, file: File) => Promise<void>;
+  loadingDishIndex: number | null;
+  handleDishImage: (index: number, file: File) => void;
 }
 
 export default function MenuForm({
@@ -16,159 +15,113 @@ export default function MenuForm({
   setMenu,
   loadingDishIndex,
   handleDishImage,
-}: MenuFormProps) {
-  const addDish = () =>
-    setMenu([
-      ...menu,
-      { id: Date.now(), name: "", description: "", price: 0, image: "" },
-    ]);
-
-  const updateDish = <K extends keyof Dish>(
-    index: number,
-    field: K,
-    value: Dish[K]
-  ) => {
+}: Props) {
+  const handleChange = (index: number, field: keyof Dish, value: string) => {
     setMenu((prev) =>
-      prev.map((dish, i) =>
-        i === index ? { ...dish, [field]: value } : dish
-      )
+      prev.map((d, i) => (i === index ? { ...d, [field]: value } : d))
     );
   };
 
-  const deleteDish = (index: number) =>
-    setMenu(menu.filter((_, i) => i !== index));
+  const addDish = () => {
+    setMenu((prev) => [
+      ...prev,
+      { id: Date.now(), name: "", description: "", price: "", image: "" },
+    ]);
+  };
+
+  const removeDish = (index: number) => {
+    setMenu((prev) => prev.filter((_, i) => i !== index));
+  };
 
   return (
-    <div className="mt-6">
-      <h3 className="text-2xl font-semibold mb-4">Menu ({menu.length})</h3>
+    <div className="space-y-6">
+      <h3 className="text-xl font-semibold mb-2">Menu</h3>
 
-      <div className="space-y-4">
-        {menu.map((dish, index) => (
-          <div
-            key={dish.id}
-            className="p-4 border rounded-xl shadow-sm bg-gray-50"
-          >
-            {/* Dish Info */}
-            <div className="grid md:grid-cols-2 gap-3">
+      {menu.map((dish, index) => (
+        <div
+          key={dish.id}
+          className="bg-gray-800 p-6 rounded-xl shadow flex flex-col gap-4"
+        >
+          {/* Dish Image Upload */}
+          <div>
+            <label className="text-sm font-medium">Dish Image</label>
+            <div className="mt-2 border-2 border-dashed rounded-xl p-4 text-center cursor-pointer hover:bg-gray-700 transition">
               <input
-                className="p-3 border rounded-lg"
-                placeholder="Dish Name"
-                value={dish.name}
-                onChange={(e) => updateDish(index, "name", e.target.value)}
-              />
-
-              <input
-                className="p-3 border rounded-lg"
-                type="number"
-                placeholder="Dish Price"
-                value={dish.price.toString()} // number → string
+                type="file"
+                className="hidden"
+                id={`dishImage-${index}`}
                 onChange={(e) =>
-                  updateDish(index, "price", Number(e.target.value))
+                  e.target.files?.[0] && handleDishImage(index, e.target.files[0])
                 }
               />
-
-              <textarea
-                className="p-3 border rounded-lg md:col-span-2 resize-none"
-                rows={2}
-                placeholder="Dish Description"
-                value={dish.description}
-                onChange={(e) =>
-                  updateDish(index, "description", e.target.value)
-                }
-              />
-
-              {/* Upload & Preview */}
-              <div className="md:col-span-2">
-                <label className="block mb-2 text-sm font-medium text-gray-700">
-                  Dish Image
-                </label>
-
-                <div className="relative border-2 border-dashed rounded-lg p-4 flex items-center justify-center cursor-pointer hover:border-blue-400 transition">
-                  <input
-                    type="file"
-                    id={`dishImage-${dish.id}`}
-                    className="hidden"
-                    onChange={(e) =>
-                      e.target.files &&
-                      handleDishImage?.(index, e.target.files[0])
-                    }
-                    disabled={loadingDishIndex === index}
-                  />
-
-                  <label
-                    htmlFor={`dishImage-${dish.id}`}
-                    className="flex flex-col items-center justify-center w-full gap-2"
-                  >
-                    {dish.image ? (
-                      <div className="relative w-full h-48 rounded-lg overflow-hidden">
-                        <Image
-                          src={dish.image}
-                          alt="Dish Preview"
-                          fill
-                          className="object-cover"
-                        />
-                        {loadingDishIndex === index && (
-                          <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-                            <Loader2
-                              className="animate-spin text-blue-600"
-                              size={24}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    ) : loadingDishIndex === index ? (
-                      <div className="flex items-center gap-2 text-blue-600">
-                        <Loader2 className="animate-spin" /> Uploading...
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center gap-1 text-gray-400">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="w-10 h-10 text-gray-300"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12v6m0-6l-3 3m3-3l3 3m-6 6h6"
-                          />
-                        </svg>
-                        <span>Click to upload dish image</span>
-                      </div>
-                    )}
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            {/* Delete Button */}
-            <div className="flex justify-end mt-3">
-              <button
-                type="button"
-                onClick={() => deleteDish(index)}
-                className="flex items-center gap-2 px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
+              <label
+                htmlFor={`dishImage-${index}`}
+                className="block cursor-pointer"
               >
-                <Trash2 size={16} />
-                Delete Dish
-              </button>
+                {loadingDishIndex === index ? (
+                  <div className="flex items-center justify-center text-blue-400 gap-2">
+                    <Loader2 className="animate-spin" /> Uploading...
+                  </div>
+                ) : dish.image ? (
+                  <div className="relative w-full h-40">
+                    <Image
+                      src={dish.image}
+                      alt="Dish"
+                      fill
+                      className="object-cover rounded-lg"
+                    />
+                  </div>
+                ) : (
+                  <span className="text-gray-400">Click to upload image</span>
+                )}
+              </label>
             </div>
           </div>
-        ))}
-      </div>
+
+          {/* Dish Inputs */}
+          <input
+            value={dish.name}
+            onChange={(e) => handleChange(index, "name", e.target.value)}
+            placeholder="Dish Name"
+            className="p-3 border rounded-lg w-full text-white placeholder:text-gray-400"
+          />
+          <textarea
+            value={dish.description}
+            onChange={(e) =>
+              handleChange(index, "description", e.target.value)
+            }
+            placeholder="Dish Description"
+            className="p-3 border rounded-lg w-full text-white placeholder:text-gray-400"
+          />
+          <input
+            type="number"
+            value={dish.price}
+            onChange={(e) => handleChange(index, "price", e.target.value)}
+            placeholder="Dish Price"
+            className="p-3 border rounded-lg w-full text-white placeholder:text-gray-400"
+          />
+
+          {/* Remove button */}
+          {menu.length > 1 && (
+            <button
+              type="button"
+              onClick={() => removeDish(index)}
+              className="flex items-center gap-2 text-red-400 hover:text-red-500"
+            >
+              <Trash2 size={18} /> Remove Dish
+            </button>
+          )}
+        </div>
+      ))}
 
       {/* Add Dish Button */}
-      <div className="mt-4">
-        <button
-          type="button"
-          onClick={addDish}
-          className="px-5 py-3 w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition"
-        >
-          + Add Dish
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={addDish}
+        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+      >
+        <Plus size={18} /> Add Dish
+      </button>
     </div>
   );
 }

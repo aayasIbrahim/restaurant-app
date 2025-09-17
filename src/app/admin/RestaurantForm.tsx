@@ -85,9 +85,17 @@ export default function RestaurantForm({ restaurantId, onClose }: Props) {
     };
 
     try {
-      if (restaurantId)
+      if (restaurantId) {
         await updateRestaurant({ id: restaurantId, data: payload }).unwrap();
-      else await addRestaurant(payload).unwrap();
+      } else {
+        await addRestaurant(payload).unwrap();
+
+        // ✅ reset form after successful add
+        form.reset();
+        setRestaurantImage("");
+        setMenu([{ id: 1, name: "", description: "", price: "", image: "" }]);
+      }
+
       onClose?.();
     } catch {
       alert("Error saving restaurant.");
@@ -95,164 +103,168 @@ export default function RestaurantForm({ restaurantId, onClose }: Props) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white shadow-xl rounded-2xl p-8 space-y-8 max-w-4xl mx-auto"
-    >
-      <h2 className="text-3xl font-bold text-center">
-        {restaurantId ? "Edit" : "Add"} Restaurant
-      </h2>
+    <section className="py-12 bg-gray-900 min-h-screen">
+      <div className="container mx-auto px-4">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-gray-900 text-white shadow-xl rounded-2xl p-8 space-y-8 max-w-4xl mx-auto"
+        >
+          <h2 className="text-3xl font-bold text-center">
+            {restaurantId ? "Edit" : "Add"} Restaurant
+          </h2>
 
-      {/* Image Upload */}
-      <div>
-        <label className="font-medium">Restaurant Image</label>
-        <div className="mt-2 border-2 border-dashed rounded-xl p-6 text-center hover:bg-gray-50 cursor-pointer transition">
-          <input
-            type="file"
-            onChange={handleRestaurantImage}
-            disabled={loadingRestaurantImage}
-            className="hidden"
-            id="restaurantImage"
-          />
-          <label htmlFor="restaurantImage" className="block cursor-pointer">
-            {loadingRestaurantImage ? (
-              <div className="flex justify-center items-center gap-2 text-blue-500">
-                <Loader2 className="animate-spin" /> Uploading...
-              </div>
-            ) : restaurantImage ? (
-              <div className="relative w-full h-60">
-                <Image
-                  src={restaurantImage}
-                  alt="Restaurant Image"
-                  fill
-                  className="object-cover rounded-xl"
-                />
-              </div>
-            ) : (
-              <span className="text-gray-500">Click to upload image</span>
+          {/* Image Upload */}
+          <div>
+            <label className="font-medium">Restaurant Image</label>
+            <div className="mt-2 border-2 border-dashed rounded-xl p-6 text-center hover:bg-gray-800 cursor-pointer transition">
+              <input
+                type="file"
+                onChange={handleRestaurantImage}
+                disabled={loadingRestaurantImage}
+                className="hidden"
+                id="restaurantImage"
+              />
+              <label htmlFor="restaurantImage" className="block cursor-pointer">
+                {loadingRestaurantImage ? (
+                  <div className="flex justify-center items-center gap-2 text-blue-400">
+                    <Loader2 className="animate-spin" /> Uploading...
+                  </div>
+                ) : restaurantImage ? (
+                  <div className="relative w-full h-60">
+                    <Image
+                      src={restaurantImage}
+                      alt="Restaurant Image"
+                      fill
+                      className="object-cover rounded-xl"
+                    />
+                  </div>
+                ) : (
+                  <span className="text-gray-400">Click to upload image</span>
+                )}
+              </label>
+            </div>
+          </div>
+
+          {/* Form Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <input
+              name="name"
+              defaultValue={restaurantData?.name}
+              placeholder="Enter restaurant name"
+              className="p-3 border rounded-lg w-full text-white  placeholder:text-gray-400"
+              required
+            />
+            <select
+              name="cuisine"
+              defaultValue={restaurantData?.cuisine}
+              className="p-3 border rounded-lg w-full text-gray-400 "
+              required
+            >
+              <option value="">Choose cuisine type</option>
+              <option>Bangladeshi</option>
+              <option>Indian</option>
+              <option>Pakistani</option>
+              <option>Chinese</option>
+              <option>Thai</option>
+              <option>Japanese</option>
+              <option>Korean</option>
+            </select>
+            <select
+              name="priceLabel"
+              defaultValue={restaurantData?.priceLabel}
+              className="p-3 border rounded-lg w-full text-gray-400"
+              required
+            >
+              <option value="">Choose price range</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
+            <input
+              name="price"
+              type="number"
+              defaultValue={restaurantData?.price}
+              placeholder="Enter average meal price"
+              className="p-3 border rounded-lg w-fulltext-white placeholder:text-gray-400"
+              required
+            />
+            <input
+              name="rating"
+              type="number"
+              step={0.1}
+              min={0}
+              max={5}
+              defaultValue={restaurantData?.rating}
+              placeholder="Enter rating (0 - 5)"
+              className="p-3 border rounded-lg w-full text-white  placeholder:text-gray-400"
+            />
+            <input
+              name="distance"
+              type="number"
+              defaultValue={restaurantData?.distance}
+              placeholder="Enter distance (km)"
+              className="p-3 border rounded-lg w-full text-white placeholder:text-gray-400"
+            />
+            <input
+              name="deliveryTime"
+              type="number"
+              defaultValue={restaurantData?.deliveryTime}
+              placeholder="Enter delivery time (minutes)"
+              className="p-3 border rounded-lg w-full  placeholder:text-gray-400"
+            />
+            <select
+              name="offer"
+              defaultValue={restaurantData?.offer}
+              className="p-3 border rounded-lg w-full text-gray-400"
+            >
+              <option value="">Choose offer type</option>
+              <option value="Free delivery">Free delivery</option>
+              <option value="Deals">Deals</option>
+              <option value="Vouchers">Accepts vouchers</option>
+            </select>
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                name="isSuper"
+                defaultChecked={restaurantData?.isSuper}
+                className="h-5 w-5"
+              />
+              <label className="text-sm">Mark as Super Restaurant</label>
+            </div>
+          </div>
+
+          {/* Menu Section */}
+          <div>
+            <MenuForm
+              menu={menu}
+              setMenu={setMenu}
+              loadingDishIndex={loadingDishIndex}
+              handleDishImage={handleDishImage}
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-4">
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full border border-gray-300 py-3 rounded-lg hover:bg-gray-800"
+              >
+                Cancel
+              </button>
             )}
-          </label>
-        </div>
+            <button
+              type="submit"
+              disabled={isAdding || isUpdating}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg flex items-center justify-center gap-2"
+            >
+              {(isAdding || isUpdating) && <Loader2 className="animate-spin" />}
+              {restaurantId ? "Update" : "Add"} Restaurant
+            </button>
+          </div>
+        </form>
       </div>
-
-      {/* Form Fields */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <input
-          name="name"
-          defaultValue={restaurantData?.name}
-          placeholder="Restaurant Name"
-          className="p-3 border rounded-lg w-full"
-          required
-        />
-        <select
-          name="cuisine"
-          defaultValue={restaurantData?.cuisine}
-          className="p-3 border rounded-lg w-full"
-          required
-        >
-          <option value="">Select Cuisine</option>
-          <option>Bangladeshi</option>
-          <option>Indian</option>
-          <option>Pakistani</option>
-          <option>Chinese</option>
-          <option>Thai</option>
-          <option>Japanese</option>
-          <option>Korean</option>
-        </select>
-        <select
-          name="priceLabel"
-          defaultValue={restaurantData?.priceLabel}
-          className="p-3 border rounded-lg w-full"
-          required
-        >
-          <option value="">Select Price Label</option>
-          <option value="Low">Low</option>
-          <option value="Medium">Medium</option>
-          <option value="High">High</option>
-        </select>
-        <input
-          name="price"
-          type="number"
-          defaultValue={restaurantData?.price}
-          placeholder="Average Price"
-          className="p-3 border rounded-lg w-full"
-          required
-        />
-        <input
-          name="rating"
-          type="number"
-          step={0.1}
-          min={0}
-          max={5}
-          defaultValue={restaurantData?.rating}
-          placeholder="Rating"
-          className="p-3 border rounded-lg w-full"
-        />
-        <input
-          name="distance"
-          type="number"
-          defaultValue={restaurantData?.distance}
-          placeholder="Distance"
-          className="p-3 border rounded-lg w-full"
-        />
-        <input
-          name="deliveryTime"
-          type="number"
-          defaultValue={restaurantData?.deliveryTime}
-          placeholder="Delivery Time"
-          className="p-3 border rounded-lg w-full"
-        />
-        <select
-          name="offer"
-          defaultValue={restaurantData?.offer}
-          className="p-3 border rounded-lg w-full"
-        >
-          <option value="">Select Offer</option>
-          <option value="Free delivery">Free delivery</option>
-          <option value="Deals">Deals</option>
-          <option value="Vouchers">Accepts vouchers</option>
-        </select>
-        <div className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            name="isSuper"
-            defaultChecked={restaurantData?.isSuper}
-            className="h-5 w-5"
-          />
-          <label className="text-sm">Mark as Super Restaurant</label>
-        </div>
-      </div>
-
-      {/* Menu Section */}
-      <div>
-        <MenuForm
-          menu={menu}
-          setMenu={setMenu}
-          loadingDishIndex={loadingDishIndex}
-          handleDishImage={handleDishImage}
-        />
-      </div>
-
-      {/* Actions */}
-      <div className="flex gap-4">
-        {onClose && (
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-full border border-gray-300 py-3 rounded-lg hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-        )}
-        <button
-          type="submit"
-          disabled={isAdding || isUpdating}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg flex items-center justify-center gap-2"
-        >
-          {(isAdding || isUpdating) && <Loader2 className="animate-spin" />}
-          {restaurantId ? "Update" : "Add"} Restaurant
-        </button>
-      </div>
-    </form>
+    </section>
   );
 }
