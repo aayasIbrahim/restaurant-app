@@ -4,14 +4,21 @@ import { useGetRestaurantsQuery, useDeleteRestaurantMutation } from "../redux/Ap
 import RestaurantForm from "./RestaurantForm";
 import { Restaurant } from "../redux/Api/restaurantTypes";
 import RestaurantManageCard from "../components/UI/RestaurantManageCard";
-
+import Pagination from "../components/UI/Pagination";
 
 export default function RestaurantList() {
-  const { data: restaurants, isLoading } = useGetRestaurantsQuery();
-  const [deleteRestaurant] = useDeleteRestaurantMutation();
+  const [page, setPage] = useState(1);
+  const limit = 2;
   const [editingRestaurant, setEditingRestaurant] = useState<string | null>(null);
 
-  if (isLoading) return <p className="text-center mt-10">Loading restaurants...</p>;
+  const { data, isLoading, isError } = useGetRestaurantsQuery({ page, limit });
+  const restaurants = data?.restaurants || [];
+  const totalPages = data?.pagination?.totalPages || 1;
+
+  const [deleteRestaurant] = useDeleteRestaurantMutation();
+
+  if (isLoading) return <p className="text-center mt-10 text-white">Loading restaurants...</p>;
+  if (isError) return <p className="text-center mt-10 text-red-500">Failed to load restaurants.</p>;
 
   const handleDelete = async (id: string) => {
     try {
@@ -25,17 +32,18 @@ export default function RestaurantList() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-10">
+      {/* Edit Form */}
       {editingRestaurant && (
         <div className="mb-6">
           <RestaurantForm restaurantId={editingRestaurant} onClose={() => setEditingRestaurant(null)} />
         </div>
       )}
 
-      <h2 className="text-3xl font-bold text-center">All Restaurants</h2>
+      <h2 className="text-3xl font-bold text-center text-white">All Restaurants</h2>
 
+      {/* Restaurant List */}
       <div className="grid md:grid-cols-2 gap-6 py-12">
-  
-        {restaurants?.map((r: Restaurant) => (
+        {restaurants.map((r: Restaurant) => (
           <RestaurantManageCard
             key={r._id}
             restaurant={r}
@@ -44,6 +52,13 @@ export default function RestaurantList() {
           />
         ))}
       </div>
+
+      {/* Pagination Component */}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={(p) => setPage(p)}
+      />
     </div>
   );
 }

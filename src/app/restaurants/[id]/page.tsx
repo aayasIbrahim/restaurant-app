@@ -16,6 +16,7 @@ import { RootState } from "../../store/store";
 import SkeletonCard from "@/app/components/UI/loading/SkeletonCard";
 import LoadingGrid from "@/app/components/UI/loading/LoadingGrid";
 import MenuCard from "@/app/components/UI/MenuCard";
+import { useGetRestaurantByIdQuery } from "@/app/redux/Api/restaurantApi";
 
 // Interfaces
 interface MenuItem {
@@ -98,26 +99,11 @@ export default function RestaurantPage({ params }: Props) {
   const favouriteIds = useSelector(
     (state: RootState) => state.favourites.items
   );
-
-  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!id) return;
-    setLoading(true);
-    fetch(`/api/restaurants/${id}`, { cache: "no-store" })
-      .then(async (res) => {
-        if (!res.ok) throw new Error("Restaurant not found");
-        return res.json();
-      })
-      .then((data) => setRestaurant(data))
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  }, [id]);
+  const{data:restaurant,isLoading}= useGetRestaurantByIdQuery(id);
 
   return (
     <section className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-black">
-      {loading ? (
+      {isLoading ? (
         <div className="container mx-auto px-4 py-10 space-y-6">
           <SkeletonCard />
           <LoadingGrid count={6} />

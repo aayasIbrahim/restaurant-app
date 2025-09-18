@@ -78,7 +78,7 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-3xl mx-auto mt-12 p-6 space-y-10">
-      <h1 className="text-3xl font-bold text-gray-800 text-center mb-8">My Profile</h1>
+      <h1 className="text-3xl font-bold text-gray-800 text-center mb-8 text-white">My Profile</h1>
 
       {message && (
         <div
